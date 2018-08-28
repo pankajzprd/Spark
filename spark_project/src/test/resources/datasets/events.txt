@@ -1,0 +1,10 @@
+Organizer1,A,20000
+Organizer1,B,10000
+Organizer2,C,30000
+Organizer1,D,20000
+Organizer3,E,10000
+Organizer1,F,20000
+Organizer1,G,20000
+Organizer2,H,10000
+Organizer3,I,20000
+Organizer1,J,20000
