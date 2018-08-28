@@ -11,11 +11,9 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.types.FloatType
 import org.apache.spark.sql.Row
 
-
-
 object sparkjoins extends {
   case class empl(emp_id: Int, name: String, salary: Float)
-case class profl(emp_id: Int, dept_id: Int, profession: String)
+  case class profl(emp_id: Int, dept_id: Int, profession: String)
   def main(args: Array[String]): Unit = {
     System.setProperty("hadoop.home.dir", "C:\\winutils")
     val spark = SparkSession
@@ -29,7 +27,7 @@ case class profl(emp_id: Int, dept_id: Int, profession: String)
     val sc = spark.sparkContext
     val ssc = new StreamingContext(sc, Seconds(10))
     //  implicits are important to work on Spark SQL
-       import spark.implicits._
+    import spark.implicits._
 
     // If you read in below manner, we'll get RDDs
     val emp = sc.textFile("src/test/resources/datasets/employee.txt", 2).map(x => x.split(","))
@@ -48,12 +46,11 @@ case class profl(emp_id: Int, dept_id: Int, profession: String)
     val rightdf = empdf.as("a").join(profdf.as("b"), $"a.emp_id" === $"b.emp_id", "right_outer")
     rightdf.collect.foreach(println)
 
+    println("Selecting few columns")
+    innerdf.select($"a.emp_id", $"a.name", $"a.salary", $"b.profession").show()
     //If you read in below manner, we'll get DataFrames
     val empfile = spark.read.text("src/test/resources/datasets/employee.txt")
     val proffile = spark.read.text("src/test/resources/datasets/employee_professions.txt")
-
-    empfile.printSchema()
-    proffile.printSchema()
 
   }
 }
