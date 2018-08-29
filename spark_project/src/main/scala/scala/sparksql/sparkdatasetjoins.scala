@@ -59,6 +59,8 @@ object sparkdatasetjoins {
 
     //employees.show()
     //professions.show()
+   // employees.printSchema()
+   // professions.printSchema()
 
   }
 }
