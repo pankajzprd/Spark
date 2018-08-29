@@ -29,6 +29,7 @@ object sparkjoins {
     println("Inner Join")
     val innerjoin = rdd1.join(rdd2, 2)
     innerjoin.collect().foreach(println)
+    innerjoin.take(10)
     println("Left Join")
     val leftouterjoin = rdd1.leftOuterJoin(rdd2, 3)
     leftouterjoin.collect().foreach(println)
