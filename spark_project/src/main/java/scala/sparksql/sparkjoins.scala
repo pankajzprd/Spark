@@ -3,12 +3,6 @@ package sparksql
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.Seconds
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.IntegerType
-import org.apache.spark.sql.types.StringType
-import org.apache.spark.sql.types.FloatType
 import org.apache.spark.sql.Row
 
 object sparkjoins extends {
@@ -25,7 +19,7 @@ object sparkjoins extends {
       .getOrCreate()
 
     val sc = spark.sparkContext
-    val ssc = new StreamingContext(sc, Seconds(10))
+    val log = sc.setLogLevel("WARN")
     //  implicits are important to work on Spark SQL
     import spark.implicits._
 
@@ -38,19 +32,58 @@ object sparkjoins extends {
 
     println("DataFrame Inner Join")
     val innerdf = empdf.as("a").join(profdf.as("b"), $"a.emp_id" === $"b.emp_id", "inner")
-    innerdf.collect().foreach(println)
+    innerdf.collect().foreach(println) // The output is shown as collection of elements here and not as table
+    innerdf.show() // The Output will be in table format
     println("DataFrame Left Outer Join")
     val leftdf = empdf.as("a").join(profdf.as("b"), $"a.emp_id" === $"b.emp_id", "left_outer")
     leftdf.collect().foreach(println)
+    leftdf.show()
     println("DataFrame Right Outer Join")
     val rightdf = empdf.as("a").join(profdf.as("b"), $"a.emp_id" === $"b.emp_id", "right_outer")
     rightdf.collect.foreach(println)
+    rightdf.show()
 
     println("Selecting few columns")
     innerdf.select($"a.emp_id", $"a.name", $"a.salary", $"b.profession").show()
-    //If you read in below manner, we'll get DataFrames
-    val empfile = spark.read.text("src/test/resources/datasets/employee.txt")
-    val proffile = spark.read.text("src/test/resources/datasets/employee_professions.txt")
+    println()
+    /*
+     * We can create temporary views on the DataFrames and perform our joins with simple SQL syntax
+     */
 
+    println("Joins using Temporary tables")
+    empdf.createOrReplaceTempView("employee")
+    profdf.createOrReplaceTempView("Professions")
+
+    println("DataFrame Inner Join with Temporary View")
+    val innerjoins = spark.sql("Select * from employee inner join professions  on employee.emp_id = professions.emp_id")
+    innerjoins.show()
+    println()
+    println("DataFrame Left Outer Join with Temporary View")
+    val leftouterjoins = spark.sql("select * from employee left outer join professions on employee.emp_id = professions.emp_id")
+    leftouterjoins.show()
+    println()
+    println("DataFrame Right Outer Join with Temporary View")
+    val rightouterjoins = spark.sql("select a.emp_id, a.name, a.salary, b.dept_id, b.profession from employee a right outer join professions b on a.emp_id = b.emp_id")
+    rightouterjoins.show()
+    /*
+     * While storing the output of the joins, make sure there are no duplicates
+     * "repartition(1)" enables to create single csv file at the output folder.
+     * If we don't specify this, we'll end up with multiple files at output location
+     */
+    rightouterjoins
+      .repartition(1)
+      .write
+      .format("csv")
+      .save("src/test/resources/rightouter")
+    //If you read in below manner, we'll get DataFrames
+    /*   println("Joins on DataSets")
+    val empfile = spark.read.text("src/test/resources/datasets/employee.txt").as[empl]
+    val proffile = spark.read.text("src/test/resources/datasets/employee_professions.txt").as[profl]
+    empfile.collect().foreach(println)
+    val innerds = empfile.as("e").join(proffile.as("p"), $"e.emp_id" === $"p.emp_id", "inner")
+    val leftds = empfile.as("e").join(proffile.as("p"), $"e.emp_id" === $"p.emp_id", "left_outer")
+    val rightds = empfile.as("e").join(proffile.as("p"), $"e.emp_id" === $"p.emp_id", "right_outer")
+*/
+    //   innerds.select($"e.emp_id", $"e.name", $"e.salary", $"p.profession").show
   }
 }
