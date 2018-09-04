@@ -8,6 +8,7 @@ import org.apache.spark.sql.Row
 object sparkjoins extends {
   case class empl(emp_id: Int, name: String, salary: Float)
   case class profl(emp_id: Int, dept_id: Int, profession: String)
+  
   def main(args: Array[String]): Unit = {
     System.setProperty("hadoop.home.dir", "C:\\winutils")
     val spark = SparkSession
@@ -66,7 +67,7 @@ object sparkjoins extends {
     val rightouterjoins = spark.sql("select a.emp_id, a.name, a.salary, b.dept_id, b.profession from employee a right outer join professions b on a.emp_id = b.emp_id")
     rightouterjoins.show()
     /*
-     * While storing the output of the joins, make sure there are no duplicates
+     * While storing the output of the joins, make sure there are no duplicate columns
      * "repartition(1)" enables to create single csv file at the output folder.
      * If we don't specify this, we'll end up with multiple files at output location
      */

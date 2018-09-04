@@ -35,7 +35,7 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/zappanka/Downloads/itversitryfiles/mysql-connector-java.jar"/>
 	<classpathentry kind="lib" path="C:/Users/zappanka/Desktop/spark-yarn_2.11-2.0.0.cloudera2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/zappanka/Downloads/sqljdbc4-2.0.jar/sqljdbc4-2.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
